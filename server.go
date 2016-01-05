@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/polaris1119/goutils"
 	"github.com/ugorji/go/codec"
 )
 
@@ -94,7 +95,7 @@ func (r *RpcServer) ListenAndServe(tcpAddr string) error {
 		tcpPort = tcpAddrs[1]
 	}
 
-	httpPort := strconv.Itoa(MustInt(tcpPort) + HttpPortAdd)
+	httpPort := strconv.Itoa(goutils.MustInt(tcpPort) + HttpPortAdd)
 
 	r.tcpAddr = tcpAddr
 	r.httpAddr = host + ":" + httpPort

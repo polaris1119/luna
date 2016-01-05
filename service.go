@@ -11,6 +11,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/polaris1119/goutils"
 	"github.com/twinj/uuid"
 )
 
@@ -64,13 +65,13 @@ func (s *Service) GenSign(args map[string]interface{}) string {
 	}
 	sort.Sort(sort.StringSlice(keys))
 
-	buffer := NewBuffer()
+	buffer := goutils.NewBuffer()
 	for _, k := range keys {
-		buffer.Append(k).Append("=").Append(ConvertString(args[k]))
+		buffer.Append(k).Append("=").Append(goutils.ConvertString(args[k]))
 	}
 	buffer.Append(s.Salt)
 
-	return Md5(buffer.String())
+	return goutils.Md5(buffer.String())
 }
 
 func FillRequireArgs(args map[string]interface{}) map[string]interface{} {
