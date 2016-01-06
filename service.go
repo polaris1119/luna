@@ -23,8 +23,12 @@ func CheckAuth(args map[string]interface{}) error {
 }
 
 type Service struct {
-	// 摘要算法用的盐
-	Salt string
+	// 摘要算法用的盐（不区分不同原来）
+	CommonSalt string
+
+	// 区分不同来源的盐，只有在 CommonSalt 是空时有效
+	// key 的值从 from 参数获取
+	FromSalt map[string]string
 
 	// 权限校验函数
 	CheckAuth func(map[string]interface{}) error
@@ -49,6 +53,13 @@ func (s *Service) checkAuth(args map[string]interface{}) error {
 			return errors.New("缺少nonce")
 		}
 
+		// 如果使用了 FromSalt，必须有 from 参数
+		if s.CommonSalt == "" {
+			if _, ok := args["from"]; !ok {
+				return errors.New("缺少from参数")
+			}
+		}
+
 		newSign := s.GenSign(args)
 		if sign != newSign {
 			return errors.New("签名不合法")
@@ -69,7 +80,16 @@ func (s *Service) GenSign(args map[string]interface{}) string {
 	for _, k := range keys {
 		buffer.Append(k).Append("=").Append(goutils.ConvertString(args[k]))
 	}
-	buffer.Append(s.Salt)
+
+	if s.CommonSalt != "" {
+		buffer.Append(s.CommonSalt)
+	} else {
+		if from, ok := args["from"]; ok {
+			if salt, ok := s.FromSalt[goutils.ConvertString(from)]; ok {
+				buffer.Append(salt)
+			}
+		}
+	}
 
 	return goutils.Md5(buffer.String())
 }
