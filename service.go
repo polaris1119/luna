@@ -15,11 +15,26 @@ import (
 	"github.com/twinj/uuid"
 )
 
-func CheckAuth(args map[string]interface{}) error {
+type Callback func(map[string]interface{}) interface{}
+
+// CheckAuth 验证通过，调用 callback，否则返回 error
+func CheckAuth(args map[string]interface{}, callback Callback) interface{} {
+	var err error
 	if DefaultService.CheckAuth != nil {
-		return DefaultService.CheckAuth(args)
+		if err = DefaultService.CheckAuth(args); err == nil {
+			if callback != nil {
+				return callback(args)
+			}
+		}
+	} else {
+		if err = DefaultService.checkAuth(args); err == nil {
+			if callback != nil {
+				return callback(args)
+			}
+		}
 	}
-	return DefaultService.checkAuth(args)
+
+	return err
 }
 
 type Service struct {
