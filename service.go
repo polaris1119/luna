@@ -8,6 +8,7 @@ package luna
 
 import (
 	"errors"
+	"reflect"
 	"sort"
 	"time"
 
@@ -15,26 +16,34 @@ import (
 	"github.com/twinj/uuid"
 )
 
-type Callback func(map[string]interface{}) interface{}
+type Callback func(map[string]interface{}, interface{}) error
 
 // CheckAuth 验证通过，调用 callback，否则返回 error
-func CheckAuth(args map[string]interface{}, callback Callback) interface{} {
+func CheckAuth(args map[string]interface{}, reply interface{}, callback Callback) error {
 	var err error
 	if DefaultService.CheckAuth != nil {
 		if err = DefaultService.CheckAuth(args); err == nil {
-			if callback != nil {
-				return callback(args)
-			}
+			return doCallback(args, reply, callback)
 		}
 	} else {
 		if err = DefaultService.checkAuth(args); err == nil {
-			if callback != nil {
-				return callback(args)
-			}
+			return doCallback(args, reply, callback)
 		}
 	}
 
 	return err
+}
+
+func doCallback(args map[string]interface{}, reply interface{}, callback Callback) error {
+	if callback != nil {
+		if reflect.TypeOf(reply).Kind() != reflect.Ptr {
+			return errors.New("argument:reply must be pointer")
+		}
+
+		return callback(args, reply)
+	}
+
+	return nil
 }
 
 type Service struct {
