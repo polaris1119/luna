@@ -10,6 +10,7 @@ import (
 	"errors"
 	"reflect"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/polaris1119/goutils"
@@ -123,7 +124,7 @@ func FillRequireArgs(args map[string]interface{}) map[string]interface{} {
 		args = make(map[string]interface{})
 	}
 	if _, ok := args["timestamp"]; !ok {
-		args["timestamp"] = time.Now().Unix()
+		args["timestamp"] = strconv.FormatInt(time.Now().Unix(), 10)
 	}
 
 	if _, ok := args["nonce"]; !ok {
