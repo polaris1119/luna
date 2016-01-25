@@ -95,7 +95,7 @@ func (r *RpcServer) ListenAndServe(tcpAddr string) error {
 		tcpPort = tcpAddrs[1]
 	}
 
-	httpPort := strconv.Itoa(goutils.MustInt(tcpPort) + HttpPortAdd)
+	httpPort := strconv.Itoa(goutils.MustInt(tcpPort, 0) + HttpPortAdd)
 
 	r.tcpAddr = tcpAddr
 	r.httpAddr = host + ":" + httpPort
